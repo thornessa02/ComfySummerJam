@@ -5,6 +5,7 @@ public class Controller : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float sprintSpeed = 10f;
     [SerializeField] private float rotationSpeed = 10f;
 
     [Header("Jump")]
@@ -18,6 +19,7 @@ public class Controller : MonoBehaviour
 [SerializeField] private float normalGravityMultiplier = 1f;
 
 private bool isGliding;
+private bool isSprinting;
 private bool jumpHeld;
 private bool isGrounded;
 
@@ -56,12 +58,25 @@ private bool isGrounded;
         isGliding = false;
     }
 }
+
+public void Sprint(InputAction.CallbackContext context)
+{
+    if (context.performed)
+    {
+        isSprinting = true;
+    }
+
+    if (context.canceled)
+    {
+        isSprinting = false;
+    }
+}
     private void FixedUpdate()
     {
         CheckGround();
 
         HandleGlide();
-
+        animator.SetBool("IsGliding", isGliding);
         Move();
     }
 
@@ -113,6 +128,8 @@ private void HandleGlide()
         groundCheckRadius,
         groundLayer
     );
+
+    animator.SetBool("IsInAir", !isGrounded);
 }
 
 private void Jump()
@@ -124,6 +141,8 @@ private void Jump()
 
     // Applique l'impulsion
     rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+
+    animator.SetTrigger("Jump");
 }
     private void Move()
     {
@@ -144,10 +163,14 @@ private void Jump()
 
         moveDirection = Vector3.ClampMagnitude(moveDirection, 1f);
 
-        Vector3 targetVelocity = moveDirection * moveSpeed;
+        Vector3 targetVelocity;
+        if(isSprinting)
+        targetVelocity = moveDirection * sprintSpeed;
+        else targetVelocity = moveDirection * moveSpeed;
 
         if(moveDirection.magnitude <= 0.1f) animator.SetBool("IsMoving",false);
         else animator.SetBool("IsMoving",true);
+        animator.SetBool("IsSprinting",isSprinting);
 
         rb.linearVelocity = new Vector3(
             targetVelocity.x,
