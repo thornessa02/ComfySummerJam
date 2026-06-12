@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 public class Controller : MonoBehaviour
 {
@@ -39,6 +40,13 @@ private bool isGrounded;
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
+    }
+    public void OnAttack(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+    {
+        Attack();
+    }
     }
     public void OnJump(InputAction.CallbackContext context)
 {
@@ -191,5 +199,10 @@ private void Jump()
                  )
             );
         }
+    }
+
+    private void Attack()
+    {
+        animator.SetTrigger("Attack");
     }
 }
